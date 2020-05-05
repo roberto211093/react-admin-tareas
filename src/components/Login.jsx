@@ -4,8 +4,8 @@ import {withRouter} from 'react-router-dom';
 
 const Login = (props) => {
     const {history} = props;
-    const [email, setEmail] = useState('rafael.r.acosta.m.93@gmail.com');
-    const [password, setPassword] = useState('123456');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const [esRegistro, setEsRegistro] = useState(true);
 
