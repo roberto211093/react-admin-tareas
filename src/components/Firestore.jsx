@@ -1,34 +1,66 @@
-import React from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import {db} from '../firebase';
 import moment from 'moment';
-// import 'moment/locale/es.js'; // Pasar a español
+import 'moment/locale/es.js'; // Pasar a español
 
 const Firestore = (props) => {
     const {user} = props;
-    const [tareas, setTareas] = React.useState([])
-    const [tarea, setTarea] = React.useState('')
-    const [modoEdicion, setModoEdicion] = React.useState(false)
-    const [id, setId] = React.useState('')
+    const [tareas, setTareas] = useState([]);
+    const [tarea, setTarea] = useState('');
+    const [modoEdicion, setModoEdicion] = useState(false);
+    const [id, setId] = useState('');
+    const [ultimaTarea, setUltimaTarea] = useState(null);
+    const [desactivar, setDesactivar] = useState(false);
 
+    const checkMoreTareas = useCallback(async (data) => {
+        const query = await db.collection(user.uid)
+            .limit(10)
+            .orderBy('fecha')
+            .startAfter(data.docs[data.docs.length - 1])
+            .get();
+        if (query.empty) {
+            console.log('No hay más tareas');
+            setDesactivar(true);
+        } else {
+            setDesactivar(false);
+        }
+    }, [user]);
 
-    React.useEffect(() => {
-
+    useEffect(() => {
+        setDesactivar(true);
         const obtenerDatos = async () => {
-
             try {
-                const data = await db.collection(user.uid).get()
-                const arrayData = data.docs.map(doc => ({id: doc.id, ...doc.data()}))
-                setTareas(arrayData)
-
+                const data = await db.collection(user.uid)
+                    .limit(10)
+                    .orderBy('fecha')
+                    .get();
+                const arrayData = data.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                setUltimaTarea(data.docs[data.docs.length - 1]);
+                setTareas(arrayData);
+                checkMoreTareas(data);
             } catch (error) {
                 console.log(error)
             }
-
         }
-
         obtenerDatos()
+    }, [user, checkMoreTareas])
 
-    }, [user])
+    const siguiente = async  () => {
+        try {
+            const data = await db.collection(user.uid)
+                .limit(10)
+                .orderBy('fecha')
+                .startAfter(ultimaTarea)// para que lo agregue despues del ultimo documento
+                .get();
+            const arrayData = data.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            setTareas([...tareas, ...arrayData]);
+            setUltimaTarea(data.docs[data.docs.length - 1]);
+            checkMoreTareas(data);
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
 
     const agregar = async (e) => {
         e.preventDefault()
@@ -125,6 +157,15 @@ const Firestore = (props) => {
                             ))
                         }
                     </ul>
+                    <button
+                        className="btn btn-info btn-block mr-2"
+                        onClick={() => siguiente()}
+                        disabled={desactivar}
+                    >
+                        {
+                            desactivar ? 'No hay más tareas' : 'Cargar más'
+                        }
+                    </button>
                 </div>
                 <div className="col-md-6">
                     <h3>
