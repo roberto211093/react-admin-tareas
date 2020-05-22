@@ -18,16 +18,9 @@ const Navbar = (props) => {
     }
     return (
         <div className="navbar navbar-dark bg-dark">
-            <Link to="/" className="navbar-brand">React Admin</Link>
+            <Link to="/admin" className="navbar-brand">React Admin</Link>
             <div>
                 <div className="d-flex">
-                    <NavLink
-                        className="btn btn-dark mr-2"
-                        to="/"
-                        exact
-                    >
-                        Inicio
-                    </NavLink>
                     {
                         user !== null
                             ?

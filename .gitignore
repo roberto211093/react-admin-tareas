@@ -22,4 +22,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+
+.idea
+.firebase
+.firebase/hosting.YnVpbGQ.cache
 /src/firebase.js
+/.firebaserc
+/firebase.json
+/firestore.indexes.json
+/firestore.rules
